@@ -4,7 +4,7 @@
 ]]
 
 
-local DEBUG_MODE = true -- determines whether BoxCast visuialize rays or not
+local DEBUG_MODE = false -- determines whether BoxCast visuialize rays or not
 
 type BoxConfig = {
 	Thickness : number,
