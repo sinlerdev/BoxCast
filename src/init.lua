@@ -3,58 +3,32 @@
 	with the same flexibilty that you have with workspace:Raycast() .
 ]]
 
-
-local DEBUG_MODE = false -- determines whether BoxCast visuialize rays or not
+local Caster = {}
+Caster.__index = Caster
 
 type BoxConfig = {
 	Thickness : number,
 	Quality : number,
+	PointAdvancement : number,
 	Ignore : {Instance}
 }
 
-export type BoxCaster = {
-	Thickness : number,
-	Quality : number,
-	RaycastParams : RaycastParams,
-	
-	_internalRays : {RaycastResult?},
-	cast : (Vector3, Vector3, RaycastParams?) -> ({RaycastResult} | nil)
-}
+export type BoxCaster = typeof(Caster)
 
-
-local function vRay(origin, direction)
-	local midPoint = (origin + direction) / 2
-
-	local part = Instance.new("Part")
-	part.Anchored = true
-	part.CFrame = CFrame.new(midPoint, origin)
-	part.Size = Vector3.new(.01,.01,direction.Magnitude)
-	part.Color = Color3.new(1, 0, 0)
-	part.Material = Enum.Material.Neon
-	part.CanQuery = false
-	part.CanTouch = false
-	part.CanCollide = false
-	
-	part.Parent = workspace
-	
-	return part
-end
-
-
-local Caster = {}
-Caster.__index = Caster
 
 function Caster.new(config : BoxConfig)
+	local Params = RaycastParams.new()
+	Params.FilterDescendantsInstances = config.Ignore
+	Params.FilterType = Enum.RaycastFilterType.Blacklist
+	
 	local self = setmetatable({
 		Thickness = config.Thickness,
 		Quality = config.Quality,
+		PointAdvancement = config.PointAdvancement or 1,
 		_internalRays = table.create(config.Thickness * config.Quality),
-		_debugParts = {}
-	}, Caster)
+		RaycastParams = Params
+	} :: BoxCaster, Caster)
 	
-	self.RaycastParams = RaycastParams.new()
-	self.RaycastParams.FilterDescendantsInstances = config.Ignore
-	self.RaycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 	return self
 end
 
@@ -67,49 +41,38 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 	local _internalRays = self._internalRays
 	table.clear(_internalRays) 
 	
-	if DEBUG_MODE then
-		for i, instanc in self._debugParts do
-			instanc:Destroy()
-			self._debugParts[i] = nil
-		end
-	end
-	
-	local thickness = self.Thickness
-	local quality = self.Quality
-	
-	local halfQuality = quality / 2
-	local halfThickness = thickness / 2
-	
-	
 	--[[
-		We calculate the following to ensure that the Box will be casted at the center
+		We calculate the half of both thickness and quality so we can 
+		cast the box the closest it can to the center of the destination.
 	]]
 	
-	local Q_Start = -halfQuality
-	local Q_End = quality - (halfQuality + 1)
-	
-	local T_Start = - halfThickness
-	local T_End = thickness - (halfThickness + 1)
-
+	local halfQuality = math.floor(self.Quality / 2)
+	local halfThickness = math.floor(self.Thickness / 2)
 	
 	local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
 	
-	for T = T_Start, T_End do
-		for Q = Q_Start, Q_End  do
-			local increaseBy = Vector3.new(Q / 10,T /10,0)
+	local newCFrame = CFrame.lookAt(origin, direction)
+	
+	for T = -halfThickness, halfThickness do	
+		
+		for Q = -halfQuality, halfQuality -1, self.PointAdvancement  do -- We do this so the box will be pointing at the center of the direction
+			
+			local Q_Decimal = Q / 10
+			local T_Decimal = T / 10
+			
+			local right = newCFrame.RightVector * Vector3.new(Q_Decimal, Q_Decimal, Q_Decimal)				
+			local forward = newCFrame.UpVector * Vector3.new(T_Decimal, T_Decimal, T_Decimal)
+			
+			local increaseBy =  right + forward
 			
 			local rayOrigin = origin + increaseBy
 			local rayDirection = direction + increaseBy
 
-			local Result = workspace:Raycast(rayOrigin, rayDirection, raycastParams or self.RaycastParams)
+			local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams or self.RaycastParams)
 			
-			if DEBUG_MODE then
-				table.insert(self._debugParts,vRay(rayOrigin, rayDirection))
-			end
-			
-			if Result then
+			if result then
 				isIntersected = true
-				table.insert(_internalRays, Result)
+				table.insert(self._internalRays, result)
 			end
 		end
 	end

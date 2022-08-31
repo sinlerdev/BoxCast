@@ -4,7 +4,10 @@
         "$className": "DataModel",
 
         "ServerScriptService" : {
-            "$path" : "bench-runner"
+            "bench-runner" : { "$path" : "bench-runner"},
+            "code" : {
+                "$path" : "tests"
+            }
         },
 
         "ServerStorage" : {
