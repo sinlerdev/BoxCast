@@ -1,4 +1,4 @@
-<img src ="gh-assets/banner.svg">
+<img src ="gh-assets/Banner.svg">
 
 **BoxCast** is a simple, flexible, and fast solution intended for casting boxes in the Roblox Engine.
 
