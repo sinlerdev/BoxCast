@@ -92,7 +92,7 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 			local increaseBy =  right + up
 			
 			local rayOrigin = origin + increaseBy
-			local rayDirection = direction + increaseBy
+			local rayDirection = direction
 
 			local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams or self.RaycastParams)
 			
