@@ -26,6 +26,9 @@ function bencher.benchmark(calls : number, fn : (...any) -> (),paramGenerator)
 	local ALL_TIME_SUM = 0
 	
 	for i = 1, calls do
+		if i == calls / 2 then
+			task.wait(1)
+		end
         local generatedParams = {paramGenerator()}
 		local TIME_START = os.clock()
 		fn(table.unpack(generatedParams))
