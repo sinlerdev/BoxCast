@@ -1,0 +1,29 @@
+
+[data-md-color-scheme="magma-white"] {
+
+  --md-default-fg-color:               rgb(0, 0, 0);
+  --md-default-fg-color--light:        rgb(0, 0, 0);
+  --md-default-fg-color--lighter:      rgb(0, 0, 0);
+  --md-default-fg-color--lightest:     rgba(212, 212, 212, 0.927);
+  --md-default-bg-color:               rgb(228,228,231);
+  --md-default-bg-color--light:        hsl(0, 0%, 100%);
+  --md-default-bg-color--lighter:      hsl(0, 0%, 100%);
+  --md-default-bg-color--lightest:     hsl(0, 0%, 100%);
+  
+  --md-primary-fg-color:               val(--md-default-bg-color);
+  --md-primary-fg-color--light:        val(--md-default-bg-color);
+  --md-primary-bg-color:               rgb(0,0,0);
+  --md-primary-bg-color--light:        rgb(0,0,0);
+
+
+  --md-accent-fg-color:                rgb(255,170,0);
+  --md-accent-fg-color--transparent:   rgb(255,170,0);
+
+
+  --md-footer-fg-color:                rgb(0, 0, 0);
+  --md-footer-fg-color--light:         rgb(0, 0, 0);
+  --md-footer-fg-color--lighter:       rgb(0, 0, 0);
+  --md-footer-bg-color:                val(--md-default-bg-color);
+  --md-footer-bg-color--dark:          val(--md-default-bg-color);
+}
+

@@ -1,0 +1,40 @@
+site_name: BoxCast
+repo_url: https://github.com/sinlerdev/boxcast
+repo_name: sinlerdev/BoxCast
+
+theme:
+  name: "material"
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  
+  palette:
+    scheme: magma-white
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+  
+extra_css:
+   - assets/extra.css
+
+nav:
+  - Home:
+    - Home: index.md
+  - Tutorials:
+    - test: Tutorials/test.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - footnotes
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

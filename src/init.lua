@@ -6,7 +6,7 @@
 local debugger = require(script.debugger)
 local resolveDirections = require(script.resolveDirections)
 
-local DEBUG_MODE = false
+local DEBUG_MODE = true
 
 local Caster = {}
 Caster.__index = Caster
@@ -21,7 +21,15 @@ type BoxConfig = {
 	Ignore : {Instance}
 }
 
-export type BoxCaster = typeof(Caster)
+export type BoxCaster = typeof(setmetatable({
+	Thickness = 1,
+	Quality = 1,
+	 PointAdvancement = 1,
+	 PlaneAdvancement = 1,
+	 PointDistance = 1,
+	 PlaneDistance = 1,
+	 Ignore = {}
+},Caster))
 
 
 function Caster.new(config : BoxConfig)
@@ -41,7 +49,24 @@ function Caster.new(config : BoxConfig)
 	} :: BoxCaster, Caster)
 
 	if DEBUG_MODE then
-		self._debugParts = {}
+		self._debugParts = table.create((config.Thickness * self.PlaneAdvancement) * (config.Quality * self.PointAdvancement))
+		
+		local halfQuality = self.Quality / 2
+		local halfThickness = self.Thickness / 2
+
+		local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
+
+		for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
+			self._debugParts[T] = {}
+			for Q = -halfQuality, halfQuality -1 , self.PointAdvancement  do -- We do this so the box will be pointing at the center of the direction
+				self._debugParts[T][Q] = debugger {
+					Parent = nil,
+					Origin = Vector3.new(),
+					Direction = Vector3.new()
+				}	
+			end
+		end
+		
 	end
 	
 	return self
@@ -56,14 +81,6 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 	local _internalRays = self._internalRays
 	table.clear(_internalRays) 
 
-	if DEBUG_MODE then
-		for _, part in self._debugParts do
-			part:Destroy()
-		end
-
-		table.clear(self._debugParts)
-	end
-
 	--[[
 		We calculate the half of both thickness and quality so we can 
 		cast the box the closest it can to the center of the destination.
@@ -74,19 +91,11 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 	
 	local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
 	
-	local newCFrame = CFrame.lookAt(origin, direction)
-
-	--[[
-			
-		We "resolve" both the upVector and the rightVector coming from `newCFrame` because sometimes they 
-		return for example (0.9, 0, 0.5) which causes some origin-calculation issues
-	]]
-
+	local newCFrame = CFrame.lookAt(origin, origin + direction)
 	local upVector = resolveDirections(newCFrame.UpVector)
 	local rightVector = resolveDirections(newCFrame.RightVector)
 
 	for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
-
 		local T_Decimal = (T / 10) * self.PlaneDistance
 
 		local up = upVector * Vector3.new(T_Decimal,  T_Decimal,  T_Decimal)
@@ -104,11 +113,11 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 			local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams or self.RaycastParams)
 			
 			if DEBUG_MODE then
-				table.insert(self._debugParts, debugger {
-					Origin = rayOrigin,
-					Direction = rayDirection,
-					Parent = workspace
-				})
+				local currentpart = self._debugParts[T][Q]
+				
+				currentpart.StartPoint.Position = rayOrigin
+				currentpart.EndPoint.Position = rayOrigin + rayDirection
+				currentpart.Parent = workspace
 			end
 
 			if result then
