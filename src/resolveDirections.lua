@@ -4,10 +4,9 @@ return function(Vector : Vector3)
     local Z = math.round(Vector.Z)
 
     local absX = math.abs(X)
-    local absY = math.abs(Y)
     local absZ = math.abs(Z)
 
-    local newVector = Vector3.new(X, Y, Z)
+    local newVector : Vector3
 
     if absX > absZ then
         newVector = Vector3.new(X, Y, 0)

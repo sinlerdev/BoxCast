@@ -75,12 +75,19 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 	local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
 	
 	local newCFrame = CFrame.lookAt(origin, direction)
-	
-	for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
-		local T_Decimal = (T / 10) * self.PlaneDistance
 
-		local upVector = resolveDirections(newCFrame.UpVector)
-		local rightVector = resolveDirections(newCFrame.RightVector)
+	--[[
+			
+		We "resolve" both the upVector and the rightVector coming from `newCFrame` because sometimes they 
+		return for example (0.9, 0, 0.5) which causes some origin-calculation issues
+	]]
+
+	local upVector = resolveDirections(newCFrame.UpVector)
+	local rightVector = resolveDirections(newCFrame.RightVector)
+
+	for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
+
+		local T_Decimal = (T / 10) * self.PlaneDistance
 
 		local up = upVector * Vector3.new(T_Decimal,  T_Decimal,  T_Decimal)
 
