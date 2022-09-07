@@ -1,7 +1,7 @@
 local benchtools = require(script.Parent.benchtools)
 
 local benchs = game:GetService("ServerStorage").benchs:GetDescendants()
-local BENCHMARK = false
+local BENCHMARK = true
 
 local results = {}
 
@@ -14,7 +14,7 @@ if BENCHMARK then
         results[benchscript.Name] = {}
     
         for _, section in content do
-            local _, result = benchtools.benchmark(section.calls, section.run, section.prerun or function() end) 
+            local _, result = benchtools.benchmark(section.calls, section.run, section.prerun or function() end, section.CacheParamters or false) 
             results[benchscript.Name][section.title] = result
             task.wait()
         end

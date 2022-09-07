@@ -10,7 +10,7 @@ function bencher.findMicroPercentile(tbl, percentile)
 end
 
 
-function bencher.benchmark(calls : number, fn : (...any) -> (),paramGenerator)
+function bencher.benchmark(calls : number, fn : (...any) -> (),paramGenerator, CacheParamters : boolean)
 	local MeasuredTable = table.create(calls)
 	local MetrixTable = {
 		["10th Percentile"] = 0,
@@ -25,13 +25,20 @@ function bencher.benchmark(calls : number, fn : (...any) -> (),paramGenerator)
 	
 	local ALL_TIME_SUM = 0
 	
+
+	local params
+
 	for i = 1, calls do
 		if i == calls / 2 then
 			task.wait(1)
 		end
-        local generatedParams = {paramGenerator()}
+
+		if CacheParamters and i > 1 then
+		else
+			params = {paramGenerator()}
+		end
 		local TIME_START = os.clock()
-		fn(table.unpack(generatedParams))
+		fn(table.unpack(params))
 		local TIME_END = os.clock()
 		 
 		local TIME_DIFFERENCE =(TIME_END - TIME_START) * 1000000
