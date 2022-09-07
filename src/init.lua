@@ -3,10 +3,26 @@
 	with the same flexibilty that you have with workspace:Raycast() .
 ]]
 
-local debugger = require(script.debugger)
 local resolveDirections = require(script.resolveDirections)
+local Visualizer = require(script.Visualizer)
+local BuildBox = require(script.BuildBox)
 
-local DEBUG_MODE = true
+local DEBUG_MODE = false
+
+local CONFIG_TYPES = {
+
+	ThicknessProperties = {
+		["Thickness"] = true,
+		["PlaneAdvancement"] = true,
+		["PlaneDistance"] = true,
+	},
+	QualityProperties = {
+		["Quality"] = true,
+		["PointAdvancement"] = true,
+		["PointDistance"] = true
+	}
+}
+
 
 local Caster = {}
 Caster.__index = Caster
@@ -21,18 +37,9 @@ type BoxConfig = {
 	Ignore : {Instance}
 }
 
-export type BoxCaster = typeof(setmetatable({
-	Thickness = 1,
-	Quality = 1,
-	 PointAdvancement = 1,
-	 PlaneAdvancement = 1,
-	 PointDistance = 1,
-	 PlaneDistance = 1,
-	 Ignore = {}
-},Caster))
-
 
 function Caster.new(config : BoxConfig)
+
 	local Params = RaycastParams.new()
 	Params.FilterDescendantsInstances = config.Ignore
 	Params.FilterType = Enum.RaycastFilterType.Blacklist
@@ -45,32 +52,51 @@ function Caster.new(config : BoxConfig)
 		PointDistance = config.PointDistance or 1,
 		PlaneDistance = config.PlaneDistance or 1,
 		_internalRays = table.create(config.Thickness * config.Quality),
-		RaycastParams = Params
-	} :: BoxCaster, Caster)
+		RaycastParams = Params,
+		_planeDifference = BuildBox(config.Thickness / 2, (config.PlaneAdvancement or 1), config.PlaneDistance or 1),
+		_pointDifference = BuildBox(config.Quality / 2, (config.PointAdvancement or 1), config.PointDistance or 1),
+
+	} , Caster)
 
 	if DEBUG_MODE then
-		self._debugParts = table.create((config.Thickness * self.PlaneAdvancement) * (config.Quality * self.PointAdvancement))
-		
-		local halfQuality = self.Quality / 2
-		local halfThickness = self.Thickness / 2
-
-		local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
-
-		for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
-			self._debugParts[T] = {}
-			for Q = -halfQuality, halfQuality -1 , self.PointAdvancement  do -- We do this so the box will be pointing at the center of the direction
-				self._debugParts[T][Q] = debugger {
-					Parent = nil,
-					Origin = Vector3.new(),
-					Direction = Vector3.new()
-				}	
-			end
-		end
-		
+		self._debugger = Visualizer.new({
+			RAY_COLOR = Color3.new(1,0,0),
+			RAY_WIDTH = 4,
+			RAY_NAME = "VISUALIZER",
+			FAR_AWAY_CFRAME = CFrame.new(0, math.huge, 0),
+			EXPIRE_AFTER =  0.2
+		})
 	end
-	
 	return self
 end
+
+
+function Caster:rebuild(config : BoxConfig)
+	local shouldRebuildThickness = false
+	local shouldRebuildQuality = false
+
+	for Title, Value in config do
+		if CONFIG_TYPES.ThicknessProperties[Title] then
+			self[Title] = Value
+			shouldRebuildThickness = true
+		end
+
+		if CONFIG_TYPES.QualityProperties[Title] then
+			self[Title] = Value
+			shouldRebuildQuality = true
+		end
+	end
+
+	if shouldRebuildQuality then
+		self._pointDifference = BuildBox(self.Quality / 2, (self.PointAdvancement), self.PointDistance)
+	end
+
+	if shouldRebuildThickness then
+		self._planeDifference = BuildBox(self.Thickness / 2, (self.PlaneAdvancement), self.PlaneDistance)
+
+	end
+end
+
 
 function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : RaycastParams?) : {RaycastResult} | nil
 	--[[
@@ -86,38 +112,27 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 		cast the box the closest it can to the center of the destination.
 	]]
 	
-	local halfQuality = self.Quality / 2
-	local halfThickness = self.Thickness / 2
-	
 	local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
-	
 	local newCFrame = CFrame.lookAt(origin, origin + direction)
 	local upVector = resolveDirections(newCFrame.UpVector)
 	local rightVector = resolveDirections(newCFrame.RightVector)
 
-	for T = -halfThickness, halfThickness - 1, self.PlaneAdvancement do	
-		local T_Decimal = (T / 10) * self.PlaneDistance
 
-		local up = upVector * Vector3.new(T_Decimal,  T_Decimal,  T_Decimal)
+	for T, ThicknessDiffernce : Vector3 in self._planeDifference do
+		local up = upVector * ThicknessDiffernce
 
-		for Q = -halfQuality, halfQuality -1 , self.PointAdvancement  do -- We do this so the box will be pointing at the center of the direction
-			
-			local Q_Decimal = (Q / 10) * self.PointDistance
-			
-			local right =  rightVector * Vector3.new(Q_Decimal,  Q_Decimal,   Q_Decimal)
-			local increaseBy =  right + up
-			
-			local rayOrigin = origin + increaseBy
+		for Q, QualityDifference : Vector3 in self._pointDifference do
+			local right = rightVector * QualityDifference
+
+			local rayOrigin = origin + (right + up)
 			local rayDirection = direction
 
+
 			local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams or self.RaycastParams)
-			
+
+
 			if DEBUG_MODE then
-				local currentpart = self._debugParts[T][Q]
-				
-				currentpart.StartPoint.Position = rayOrigin
-				currentpart.EndPoint.Position = rayOrigin + rayDirection
-				currentpart.Parent = workspace
+				self._debugger:castRay(rayOrigin, rayDirection)
 			end
 
 			if result then

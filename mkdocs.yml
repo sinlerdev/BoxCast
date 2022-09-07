@@ -26,7 +26,9 @@ nav:
   - Home:
     - Home: index.md
   - Tutorials:
-    - test: Tutorials/test.md
+    - Introduction: Tutorials/introduction.md
+    - Usage: Tutorials/usage.md
+    - Best Practices: Tutorials/best.md
 
 markdown_extensions:
   - pymdownx.highlight
