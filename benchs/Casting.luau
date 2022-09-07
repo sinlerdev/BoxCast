@@ -3,7 +3,8 @@ local BoxCast = require(script.Parent.Parent.BoxCast)
 return {
     {
         title = "Casting - 4 thickness & quality",
-        calls = 2000,
+        calls = 1000,
+        CacheParamters = true,
 
         prerun = function()
             return BoxCast.new({
@@ -19,7 +20,8 @@ return {
     },
     {
         title = "Casting - 6 thickness 4 quality",
-        calls = 2000,
+        calls = 1000,
+        CacheParamters = true,
 
         prerun = function()
             return BoxCast.new({
@@ -35,7 +37,8 @@ return {
     },
     {
         title = "Casting - 6 thickness 4 quality - 0.1 Point/Plane advancement",
-        calls = 2000,
+        calls = 1000,
+        CacheParamters = true,
 
         prerun = function()
             return BoxCast.new({
@@ -53,7 +56,8 @@ return {
     },
     {
         title = "Casting - 6 thickness 4 quality - 0.1 Point/Plane distance",
-        calls = 2000,
+        calls = 1000,
+        CacheParamters = true,
 
         prerun = function()
             return BoxCast.new({
