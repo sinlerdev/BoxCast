@@ -107,12 +107,13 @@ function Caster:cast(origin : Vector3, direction : Vector3, raycastParams : Rayc
 	local _internalRays = self._internalRays
 	table.clear(_internalRays) 
 
-	--[[
-		We calculate the half of both thickness and quality so we can 
-		cast the box the closest it can to the center of the destination.
-	]]
-	
+
 	local isIntersected = false -- this is so we can decide whether to return nil, or the tables of rays
+
+	--[[
+		We create a cframe from the origin and destination so that we can determine which axies is our right
+		and upwards.
+	]]
 	local newCFrame = CFrame.lookAt(origin, origin + direction)
 	local upVector = resolveDirections(newCFrame.UpVector)
 	local rightVector = resolveDirections(newCFrame.RightVector)
