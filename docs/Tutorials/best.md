@@ -14,7 +14,7 @@ Something that beginners would fall into is creating a caster for each object th
 
 
 ## **Rebuild Only When Needed**
-Rebuilding should be limited to reusing casters if your use-case can't use generalized casters, and it is important to know what `Caster:rebuild()` optimizes and whatnot.
+Rebuilding should be limited to reusing casters, so it is important to know what optimizations `rebuild` performs.
 
 * the `Caster:rebuild()` only updates the necessary properties...
     * Or in other words, you pay for what you use.

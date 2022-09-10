@@ -10,7 +10,7 @@ local BoxCast = require(PATH_TO_BOXCAST)
 local Caster = BoxCast.new()
 ```
 
-This errors as we haven't given any information for BoxCast to use, let's start doing that! Firstly, we need our caster to be 5 studs tall and 6 studs width. To acheive this, we can use the `Thickness` property for tallness, and `Quality` for the width!
+This errors as we haven't given any information for BoxCast to use, let's start doing that! Firstly, we need our caster to be 5 studs tall and 6 studs width. To acheive this, we can use the `Thickness` property for tallness, and `Quality` for the wide!
 
 ```Lua
 

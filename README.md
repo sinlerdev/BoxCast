@@ -3,7 +3,7 @@
 **BoxCast** is a simple, flexible, and fast solution intended for casting boxes in the Roblox Engine.
 
 ### How Does BoxCast work?
-BoxCast essentially works by calculating a derived verisions of the origin & the direction you provided, and then cast a ray using those dervied values.
+BoxCast essentially works by calculating a derived verisions of the origin you provided, and then cast a ray using those dervied values.
 
 ### How fast can it be?
 BoxCast can be ***really*** fast. In our benchmarks, we have seen an average of 200 microseconds. Check the `benchs` folder in this repro for the benchmarkings.
