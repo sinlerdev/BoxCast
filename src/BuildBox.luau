@@ -7,4 +7,3 @@ return function(half, Advancement, distance)
     end
     return Table
 end
-
